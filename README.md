@@ -1,5 +1,5 @@
 # feta
-_F_lock _E_mergency and _T_emperature _A_lerts application
+__F__lock __E__mergency and __T__emperature __A__lerts application
 ## Getting Started
 
 A [flutter](flutter.org) project aimed mostly at android end-devices, targeted for livestock alerts
