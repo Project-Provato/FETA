@@ -1,0 +1,14 @@
+[
+  {
+    "username": "Luna",
+    "age": 3,
+    "gender": "Female",
+    "extra_info": "Last medical checkup: 2 weeks ago."
+  },
+  {
+    "username": "Max",
+    "age": 4,
+    "gender": "Male",
+    "extra_info": "Recovered from foot injury recently."
+  }
+]
