@@ -1,14 +1,12 @@
 [
-  {
-    "username": "Luna",
-    "age": 3,
-    "gender": "Female",
-    "extra_info": "Last medical checkup: 2 weeks ago."
-  },
-  {
-    "username": "Max",
-    "age": 4,
-    "gender": "Male",
-    "extra_info": "Recovered from foot injury recently."
-  }
+    { "username": "Luna", "age": 2, "gender": "Female", "extra_info": "Loves fresh grass." },
+    { "username": "Max", "age": 3, "gender": "Male", "extra_info": "Curious and playful." },
+    { "username": "Bella", "age": 2, "gender": "Female", "extra_info": "Smallest in the group." },
+    { "username": "Rocky", "age": 4, "gender": "Male", "extra_info": "Often naps in the sun." },
+    { "username": "Milo", "age": 5, "gender": "Male", "extra_info": "Very energetic lamb." },
+    { "username": "Zoe", "age": 5, "gender": "Female", "extra_info": "Very friendly." },
+    { "username": "Toby", "age": 6, "gender": "Male", "extra_info": "Keeps an eye on others." },
+    { "username": "Nala", "age": 4, "gender": "Female", "extra_info": "Loves to run." },
+    { "username": "Finn", "age": 5, "gender": "Male", "extra_info": "Very alert." },
+    { "username": "Rosie", "age": 6, "gender": "Female", "extra_info": "Shy but sweet." }
 ]

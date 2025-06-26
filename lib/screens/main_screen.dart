@@ -115,10 +115,55 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return Scaffold(
-      body: _loadingUsers
-          ? const Center(child: CircularProgressIndicator())
-          : pages[_selectedIndex],
+      body: Column(
+        children: [
+          // HEADER
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Image.asset(
+                  'assets/fabicon_400x400.png',
+                  height: 80,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'PRoVaTo: FETA',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
 
+          // CONTENT AREA WITH BACKGROUND IMAGE
+          Expanded(
+            child: Stack(
+              children: [
+                Opacity(
+                  opacity: 0.15,
+                  child: Image.asset(
+                    'assets/sheeps.jpg',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+                _loadingUsers
+                    ? const Center(child: CircularProgressIndicator())
+                    : pages[_selectedIndex],
+              ],
+            ),
+          ),
+        ],
+      ),
+
+      // FLOATING ACTION BUTTON
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddUserDialog,
         tooltip: 'Add User',
@@ -126,6 +171,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
+      // BOTTOM NAVIGATION BAR
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,

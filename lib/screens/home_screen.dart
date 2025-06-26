@@ -9,11 +9,38 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return users.isEmpty
-        ? const Center(child: CircularProgressIndicator())
-        : ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) => ExpandableItem(user: users[index]),
-          );
+    if (users.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Split users into two groups
+    final youngFlock = users.where((u) => u.age < 4).toList();
+    final oldFlock = users.where((u) => u.age >= 4).toList();
+
+    return ListView(
+      padding: const EdgeInsets.only(top: 16, bottom: 80),
+      children: [
+        if (youngFlock.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
+              'Warning',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...youngFlock.map((user) => ExpandableItem(user: user, imageColor: Colors.redAccent)).toList(),
+        ],
+        if (oldFlock.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
+            child: Text(
+              'Healthy',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...oldFlock.map((user) => ExpandableItem(user: user, imageColor: Colors.greenAccent)).toList(),
+        ],
+      ],
+    );
   }
 }

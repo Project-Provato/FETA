@@ -3,8 +3,13 @@ import '../models/user_item.dart';
 
 class ExpandableItem extends StatefulWidget {
   final UserItem user;
+  final Color imageColor; // ✅ NEW INPUT
 
-  const ExpandableItem({super.key, required this.user});
+  const ExpandableItem({
+    super.key,
+    required this.user,
+    required this.imageColor,
+  });
 
   @override
   State<ExpandableItem> createState() => _ExpandableItemState();
@@ -26,8 +31,15 @@ class _ExpandableItemState extends State<ExpandableItem> {
                 Container(
                   width: 64,
                   height: 64,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image, size: 32),
+                  decoration: BoxDecoration(
+                    color: widget.imageColor, // ✅ Use provided color
+                    borderRadius: BorderRadius.circular(8),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/fabicon_192x192.png'),
+                      fit: BoxFit.cover,
+                      opacity: 0.9, // optional
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -48,7 +60,7 @@ class _ExpandableItemState extends State<ExpandableItem> {
                       _expanded = !_expanded;
                     });
                   },
-                )
+                ),
               ],
             ),
             if (_expanded) ...[
