@@ -12,6 +12,13 @@ FETA is a mobile application designed for livestock monitoring, providing real-t
 - 📱 Movement tracking
 - ⚠️ Emergency notifications
 - 📊 Health analytics
+## 📱 Screenshots & Demos
+
+### Home Screen
+![Home Screen Demo](assets/home.gif)
+
+### Calendar View
+![Calendar Demo](assets/calendar.gif)
 
 ## 🚀 Quick Start
 
