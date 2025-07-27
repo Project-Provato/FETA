@@ -15,11 +15,15 @@ FETA is a mobile application designed for livestock monitoring, providing real-t
 
 ## 📱 Screenshots & Demos
 
+<div align="center">
+
 ### Home Screen
 <img src="assets/home.gif" width="50%" alt="Home Screen Demo">
 
 ### Calendar View
 <img src="assets/calendar.gif" width="50%" alt="Calendar Demo">
+
+</div>
 
 ## 🚀 Quick Start
 
@@ -58,6 +62,41 @@ flutter build apk --release
 # App bundle for Play Store
 flutter build appbundle --release
 ```
+
+## 🚧 Roadmap
+
+### 🎯 Next Release (v0.2)
+- [ ] **Real-time Monitoring**
+  - [ ] Temperature readings integration
+  - [ ] Push notification alerts
+  - [ ] Movement tracking basics
+
+- [ ] **Data Management**
+  - [ ] Local database setup (SQLite)
+  - [ ] Export health reports (PDF/CSV)
+  - [ ] Data backup functionality
+
+### Future Features (v1.0+)
+- [ ] **Backend & Sync**
+  - [ ] Cloud database integration
+  - [ ] Multi-device synchronization
+  - [ ] REST API development
+
+- [ ] **Analytics & Insights**
+  - [ ] Historical data charts
+  - [ ] Health trend analysis
+  - [ ] Predictive alerts
+
+- [ ] **Polish & Accessibility**
+  - [ ] Accessibility improvements
+  - [ ] Advanced error handling
+  - [ ] Multilingual support
+
+### ✅ Completed
+- [x] Basic UI framework
+- [x] Calendar integration
+- [x] Responsive design
+- [x] Dark mode support
 
 ## 🤝 Contributing
 
