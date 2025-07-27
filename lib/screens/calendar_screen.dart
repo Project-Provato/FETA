@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:convert';
+import '../models/event.dart';
+import '../data/events_data.dart';
+import '../l10n/app_localizations.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -17,41 +19,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
-  
-  // Store events in JSON-like format
-  Map<String, List<Map<String, dynamic>>> _eventsData = {};
 
   @override
   void initState() {
     super.initState();
     _selectedDay = DateTime.now();
-    _loadSampleData();
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-  }
-
-  void _loadSampleData() {
-    // Sample JSON data
-    _eventsData = {
-      '2025-07-27': [
-        {'title': 'Vaccination - Sheep #123', 'type': 'medical', 'time': '09:00'},
-        {'title': 'Health Check - Flock A', 'type': 'checkup', 'time': '14:00'},
-      ],
-      '2025-07-28': [
-        {'title': 'Feed Delivery', 'type': 'feeding', 'time': '08:00'},
-      ],
-      '2025-07-30': [
-        {'title': 'Vet Visit - Emergency', 'type': 'emergency', 'time': '10:30'},
-        {'title': 'Temperature Alert', 'type': 'alert', 'time': '15:45'},
-      ],
-      '2025-08-01': [
-        {'title': 'Heat Stress Warning - High Temperature Alert', 'type': 'alert', 'time': '12:00'},
-        {'title': 'Increase Water Supply', 'type': 'feeding', 'time': '13:00'},
-      ],
-      '2025-08-02': [
-        {'title': 'Heat Stress Monitoring', 'type': 'checkup', 'time': '11:00'},
-        {'title': 'Shade Structure Check', 'type': 'other', 'time': '14:30'},
-      ],
-    };
   }
 
   @override
@@ -61,9 +34,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   List<Event> _getEventsForDay(DateTime day) {
-    final dateKey = _formatDateKey(day);
-    final eventsJson = _eventsData[dateKey] ?? [];
-    return eventsJson.map((json) => Event.fromJson(json)).toList();
+    return EventsData.getEventsForDate(day);  // Changed from events_data.getEventsForDay
   }
 
   List<Event> _getEventsForRange(DateTime start, DateTime end) {
@@ -77,72 +48,91 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  void _addEvent(String title, String type, String time) {
+  void _addEvent(String title, String type, String time, String description) {
     if (_selectedDay == null) return;
     
-    final dateKey = _formatDateKey(_selectedDay!);
-    final newEvent = {
-      'title': title,
-      'type': type,
-      'time': time,
-    };
+    final newEvent = Event(
+      title: title,
+      type: type,
+      time: time,
+      description: description,
+    );
 
     setState(() {
-      if (_eventsData[dateKey] == null) {
-        _eventsData[dateKey] = [];
-      }
-      _eventsData[dateKey]!.add(newEvent);
+      EventsData.addEvent(_selectedDay!, newEvent);  // Changed from events_data.addEvent
+      _selectedEvents.value = _getEventsForDay(_selectedDay!);
+    });
+  }
+
+  void _deleteEvent(Event event) {
+    if (_selectedDay == null || event.id == null) return;
+    
+    setState(() {
+      EventsData.deleteEvent(_selectedDay!, event.id!);  // Use proper delete method
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
     });
   }
 
   void _showAddEventDialog() {
+    final l10n = AppLocalizations.of(context);
     final titleController = TextEditingController();
     final timeController = TextEditingController();
+    final descriptionController = TextEditingController();
     String selectedType = 'medical';
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Event'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Event Title',
-                hintText: 'e.g., Vaccination - Sheep #456',
+        title: Text(l10n.addEvent),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  labelText: l10n.eventTitle,
+                  hintText: 'e.g., ${l10n.vaccination} - Sheep #456',
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: selectedType,
-              decoration: const InputDecoration(labelText: 'Event Type'),
-              items: const [
-                DropdownMenuItem(value: 'medical', child: Text('Medical')),
-                DropdownMenuItem(value: 'feeding', child: Text('Feeding')),
-                DropdownMenuItem(value: 'checkup', child: Text('Checkup')),
-                DropdownMenuItem(value: 'emergency', child: Text('Emergency')),
-                DropdownMenuItem(value: 'alert', child: Text('Alert')),
-                DropdownMenuItem(value: 'other', child: Text('Other')),
-              ],
-              onChanged: (value) => selectedType = value!,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: timeController,
-              decoration: const InputDecoration(
-                labelText: 'Time',
-                hintText: 'e.g., 09:00',
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedType,
+                decoration: InputDecoration(labelText: l10n.eventType),
+                items: [
+                  DropdownMenuItem(value: 'medical', child: Text(l10n.medical)),
+                  DropdownMenuItem(value: 'feeding', child: Text(l10n.feeding)),
+                  DropdownMenuItem(value: 'checkup', child: Text(l10n.checkup)),
+                  DropdownMenuItem(value: 'emergency', child: Text(l10n.emergency)),
+                  DropdownMenuItem(value: 'alert', child: Text(l10n.alert)),
+                  DropdownMenuItem(value: 'other', child: Text(l10n.other)),
+                ],
+                onChanged: (value) => selectedType = value!,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: timeController,
+                decoration: InputDecoration(
+                  labelText: l10n.time,
+                  hintText: 'e.g., 09:00',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: '${l10n.description} (${l10n.optional})',
+                  hintText: l10n.additionalDetails,
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -150,12 +140,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _addEvent(
                   titleController.text,
                   selectedType,
-                  timeController.text.isEmpty ? 'All day' : timeController.text,
+                  timeController.text.isEmpty ? l10n.allDay : timeController.text,
+                  descriptionController.text,
                 );
                 Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            child: Text(l10n.add),
           ),
         ],
       ),
@@ -196,9 +187,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendar'),
+        title: Text(l10n.calendar),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Column(
@@ -242,13 +235,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Events for ${_formatDateKey(_selectedDay!)}',
+                    '${l10n.eventsFor} ${_formatDateKey(_selectedDay!)}',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   ElevatedButton.icon(
                     onPressed: _showAddEventDialog,
                     icon: const Icon(Icons.add),
-                    label: const Text('Add Event'),
+                    label: Text(l10n.addEvent),
                   ),
                 ],
               ),
@@ -259,11 +252,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
               valueListenable: _selectedEvents,
               builder: (context, value, _) {
                 if (value.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      'No events for this day\nTap "Add Event" to create one',
+                      l10n.noEvents,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   );
                 }
@@ -287,16 +280,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           color: event.getTypeColor(),
                         ),
                         title: Text(event.title),
-                        subtitle: Text('${event.type} • ${event.time}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${event.type} • ${event.time}'),
+                            if (event.description.isNotEmpty)
+                              Text(
+                                event.description,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                          ],
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              final dateKey = _formatDateKey(_selectedDay!);
-                              _eventsData[dateKey]?.removeAt(index);
-                              _selectedEvents.value = _getEventsForDay(_selectedDay!);
-                            });
-                          },
+                          onPressed: () => _deleteEvent(event),
                         ),
                       ),
                     );
@@ -309,72 +306,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
     );
   }
-}
-
-// Updated Event class with JSON support
-class Event {
-  final String title;
-  final String type;
-  final String time;
-
-  const Event({
-    required this.title,
-    required this.type,
-    required this.time,
-  });
-
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return Event(
-      title: json['title'] ?? '',
-      type: json['type'] ?? 'other',
-      time: json['time'] ?? 'All day',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'type': type,
-      'time': time,
-    };
-  }
-
-  Color getTypeColor() {
-    switch (type) {
-      case 'medical':
-        return Colors.blue;
-      case 'emergency':
-        return Colors.red;
-      case 'feeding':
-        return Colors.green;
-      case 'checkup':
-        return Colors.orange;
-      case 'alert':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData getTypeIcon() {
-    switch (type) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'emergency':
-        return Icons.emergency;
-      case 'feeding':
-        return Icons.restaurant;
-      case 'checkup':
-        return Icons.health_and_safety;
-      case 'alert':
-        return Icons.warning;
-      default:
-        return Icons.event;
-    }
-  }
-
-  @override
-  String toString() => title;
 }
 
 final kFirstDay = DateTime(DateTime.now().year - 1, 1, 1);
