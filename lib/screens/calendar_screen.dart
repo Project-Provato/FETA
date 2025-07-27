@@ -43,6 +43,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
         {'title': 'Vet Visit - Emergency', 'type': 'emergency', 'time': '10:30'},
         {'title': 'Temperature Alert', 'type': 'alert', 'time': '15:45'},
       ],
+      '2025-08-01': [
+        {'title': 'Heat Stress Warning - High Temperature Alert', 'type': 'alert', 'time': '12:00'},
+        {'title': 'Increase Water Supply', 'type': 'feeding', 'time': '13:00'},
+      ],
+      '2025-08-02': [
+        {'title': 'Heat Stress Monitoring', 'type': 'checkup', 'time': '11:00'},
+        {'title': 'Shade Structure Check', 'type': 'other', 'time': '14:30'},
+      ],
     };
   }
 
