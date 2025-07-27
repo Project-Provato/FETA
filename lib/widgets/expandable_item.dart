@@ -3,7 +3,7 @@ import '../models/user_item.dart';
 
 class ExpandableItem extends StatefulWidget {
   final UserItem user;
-  final Color imageColor; // ✅ NEW INPUT
+  final Color imageColor; // Color for the image background
 
   const ExpandableItem({
     super.key,
@@ -32,7 +32,7 @@ class _ExpandableItemState extends State<ExpandableItem> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: widget.imageColor, // ✅ Use provided color
+                    color: widget.imageColor,
                     borderRadius: BorderRadius.circular(8),
                     image: const DecorationImage(
                       image: AssetImage('assets/fabicon_192x192.png'),
