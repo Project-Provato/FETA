@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../models/event.dart';
 import '../data/events_data.dart';
-import '../l10n/app_localizations.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -34,7 +33,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   List<Event> _getEventsForDay(DateTime day) {
-    return EventsData.getEventsForDate(day);  // Changed from events_data.getEventsForDay
+    return EventsData.getEventsForDate(day);
   }
 
   List<Event> _getEventsForRange(DateTime start, DateTime end) {
@@ -59,7 +58,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
 
     setState(() {
-      EventsData.addEvent(_selectedDay!, newEvent);  // Changed from events_data.addEvent
+      EventsData.addEvent(_selectedDay!, newEvent);
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
     });
   }
@@ -68,87 +67,142 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (_selectedDay == null || event.id == null) return;
     
     setState(() {
-      EventsData.deleteEvent(_selectedDay!, event.id!);  // Use proper delete method
+      EventsData.deleteEvent(_selectedDay!, event.id!);
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
     });
   }
 
   void _showAddEventDialog() {
-    final l10n = AppLocalizations.of(context);
     final titleController = TextEditingController();
-    final timeController = TextEditingController();
     final descriptionController = TextEditingController();
     String selectedType = 'medical';
+    TimeOfDay? selectedTime;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.addEvent),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelText: l10n.eventTitle,
-                  hintText: 'e.g., ${l10n.vaccination} - Sheep #456',
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Add Event'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Event Title',
+                    hintText: 'e.g., Vaccination - Sheep #456',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedType,
-                decoration: InputDecoration(labelText: l10n.eventType),
-                items: [
-                  DropdownMenuItem(value: 'medical', child: Text(l10n.medical)),
-                  DropdownMenuItem(value: 'feeding', child: Text(l10n.feeding)),
-                  DropdownMenuItem(value: 'checkup', child: Text(l10n.checkup)),
-                  DropdownMenuItem(value: 'emergency', child: Text(l10n.emergency)),
-                  DropdownMenuItem(value: 'alert', child: Text(l10n.alert)),
-                  DropdownMenuItem(value: 'other', child: Text(l10n.other)),
-                ],
-                onChanged: (value) => selectedType = value!,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: timeController,
-                decoration: InputDecoration(
-                  labelText: l10n.time,
-                  hintText: 'e.g., 09:00',
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  decoration: const InputDecoration(labelText: 'Event Type'),
+                  items: const [
+                    DropdownMenuItem(value: 'medical', child: Text('Medical')),
+                    DropdownMenuItem(value: 'feeding', child: Text('Feeding')),
+                    DropdownMenuItem(value: 'checkup', child: Text('Checkup')),
+                    DropdownMenuItem(value: 'emergency', child: Text('Emergency')),
+                    DropdownMenuItem(value: 'alert', child: Text('Alert')),
+                    DropdownMenuItem(value: 'other', child: Text('Other')),
+                  ],
+                  onChanged: (value) => selectedType = value!,
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(
-                  labelText: '${l10n.description} (${l10n.optional})',
-                  hintText: l10n.additionalDetails,
+                const SizedBox(height: 16),
+                // Time picker button
+                InkWell(
+                  onTap: () async {
+                    final TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime ?? TimeOfDay.now(),
+                      builder: (BuildContext context, Widget? child) {
+                        return MediaQuery(
+                          data: MediaQuery.of(context).copyWith(
+                            alwaysUse24HourFormat: true,
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (pickedTime != null) {
+                      setState(() {
+                        selectedTime = pickedTime;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.access_time),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            selectedTime != null
+                                ? '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}'
+                                : 'Time',
+                            style: TextStyle(
+                              color: selectedTime != null 
+                                  ? Theme.of(context).textTheme.bodyLarge?.color
+                                  : Theme.of(context).hintColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        if (selectedTime != null)
+                          IconButton(
+                            icon: const Icon(Icons.clear, size: 20),
+                            onPressed: () {
+                              setState(() {
+                                selectedTime = null;
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-                maxLines: 2,
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (optional)',
+                    hintText: 'Additional details...',
+                  ),
+                  maxLines: 2,
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  final timeString = selectedTime != null
+                      ? '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}'
+                      : 'All day';
+                
+                  _addEvent(
+                    titleController.text,
+                    selectedType,
+                    timeString,
+                    descriptionController.text,
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (titleController.text.isNotEmpty) {
-                _addEvent(
-                  titleController.text,
-                  selectedType,
-                  timeController.text.isEmpty ? l10n.allDay : timeController.text,
-                  descriptionController.text,
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: Text(l10n.add),
-          ),
-        ],
       ),
     );
   }
@@ -187,11 +241,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.calendar),
+        title: const Text('Calendar'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Column(
@@ -235,13 +287,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${l10n.eventsFor} ${_formatDateKey(_selectedDay!)}',
+                    'Events for ${_formatDateKey(_selectedDay!)}',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   ElevatedButton.icon(
                     onPressed: _showAddEventDialog,
                     icon: const Icon(Icons.add),
-                    label: Text(l10n.addEvent),
+                    label: const Text('Add Event'),
                   ),
                 ],
               ),
@@ -252,11 +304,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
               valueListenable: _selectedEvents,
               builder: (context, value, _) {
                 if (value.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Text(
-                      l10n.noEvents,
+                      'No events for this day\nTap "Add Event" to create one',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Colors.grey),
                     ),
                   );
                 }

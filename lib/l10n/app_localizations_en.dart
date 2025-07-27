@@ -93,4 +93,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get additionalDetails => 'Additional details...';
+
+  @override
+  String get language => 'Language';
 }

@@ -19,9 +19,15 @@ FETA is a mobile application designed for livestock monitoring, providing real-t
 
 ### Home Screen
 <img src="assets/home.gif" width="50%" alt="Home Screen Demo">
+---
 
-### Calendar View
+### Calendar View 1
 <img src="assets/showcase.gif" width="50%" alt="Calendar Demo">
+---
+
+### Reminder in Calendar
+<img src="assets/vaccination.gif" width=50% alt="Vaccination Reminder">
+---
 
 </div>
 
@@ -97,6 +103,7 @@ flutter build appbundle --release
 - [x] Calendar integration
 - [x] Responsive design
 - [x] Dark mode support
+- [X] Basic support for standard localization (greek/english)
 
 ## 🤝 Contributing
 

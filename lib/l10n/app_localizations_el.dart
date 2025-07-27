@@ -92,4 +92,7 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get additionalDetails => 'Πρόσθετες λεπτομέρειες...';
+
+  @override
+  String get language => 'Γλώσσα';
 }

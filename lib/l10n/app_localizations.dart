@@ -61,6 +61,7 @@ abstract class AppLocalizations {
   String get temperatureAlert;
   String get optional;
   String get additionalDetails;
+  String get language;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
