@@ -19,14 +19,16 @@ FETA is a mobile application designed for livestock monitoring, providing real-t
 
 ### Home Screen
 <img src="assets/home.gif" width="50%" alt="Home Screen Demo">
+
 ---
 
-### Calendar View 1
+### Calendar
 <img src="assets/showcase.gif" width="50%" alt="Calendar Demo">
 ---
 
-### Reminder in Calendar
+### Reminder for an ewe
 <img src="assets/vaccination.gif" width=50% alt="Vaccination Reminder">
+
 ---
 
 </div>
