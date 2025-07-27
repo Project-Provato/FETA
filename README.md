@@ -67,7 +67,7 @@ flutter build appbundle --release
 
 ### 🎯 Next Release (v0.2)
 - [ ] **Real-time Monitoring**
-  - [ ] Temperature sensor integration
+  - [ ] Temperature readings integration
   - [ ] Push notification alerts
   - [ ] Movement tracking basics
 
