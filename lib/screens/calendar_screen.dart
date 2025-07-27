@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:convert';
+import '../models/event.dart';
+import '../data/events_data.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -17,33 +18,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
-  
-  // Store events in JSON-like format
-  Map<String, List<Map<String, dynamic>>> _eventsData = {};
 
   @override
   void initState() {
     super.initState();
     _selectedDay = DateTime.now();
-    _loadSampleData();
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-  }
-
-  void _loadSampleData() {
-    // Sample JSON data
-    _eventsData = {
-      '2025-07-27': [
-        {'title': 'Vaccination - Sheep #123', 'type': 'medical', 'time': '09:00'},
-        {'title': 'Health Check - Flock A', 'type': 'checkup', 'time': '14:00'},
-      ],
-      '2025-07-28': [
-        {'title': 'Feed Delivery', 'type': 'feeding', 'time': '08:00'},
-      ],
-      '2025-07-30': [
-        {'title': 'Vet Visit - Emergency', 'type': 'emergency', 'time': '10:30'},
-        {'title': 'Temperature Alert', 'type': 'alert', 'time': '15:45'},
-      ],
-    };
   }
 
   @override
@@ -53,9 +33,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   List<Event> _getEventsForDay(DateTime day) {
-    final dateKey = _formatDateKey(day);
-    final eventsJson = _eventsData[dateKey] ?? [];
-    return eventsJson.map((json) => Event.fromJson(json)).toList();
+    return EventsData.getEventsForDate(day);
   }
 
   List<Event> _getEventsForRange(DateTime start, DateTime end) {
@@ -69,87 +47,162 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  void _addEvent(String title, String type, String time) {
+  void _addEvent(String title, String type, String time, String description) {
     if (_selectedDay == null) return;
     
-    final dateKey = _formatDateKey(_selectedDay!);
-    final newEvent = {
-      'title': title,
-      'type': type,
-      'time': time,
-    };
+    final newEvent = Event(
+      title: title,
+      type: type,
+      time: time,
+      description: description,
+    );
 
     setState(() {
-      if (_eventsData[dateKey] == null) {
-        _eventsData[dateKey] = [];
-      }
-      _eventsData[dateKey]!.add(newEvent);
+      EventsData.addEvent(_selectedDay!, newEvent);
+      _selectedEvents.value = _getEventsForDay(_selectedDay!);
+    });
+  }
+
+  void _deleteEvent(Event event) {
+    if (_selectedDay == null || event.id == null) return;
+    
+    setState(() {
+      EventsData.deleteEvent(_selectedDay!, event.id!);
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
     });
   }
 
   void _showAddEventDialog() {
     final titleController = TextEditingController();
-    final timeController = TextEditingController();
+    final descriptionController = TextEditingController();
     String selectedType = 'medical';
+    TimeOfDay? selectedTime;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Event'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Event Title',
-                hintText: 'e.g., Vaccination - Sheep #456',
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: selectedType,
-              decoration: const InputDecoration(labelText: 'Event Type'),
-              items: const [
-                DropdownMenuItem(value: 'medical', child: Text('Medical')),
-                DropdownMenuItem(value: 'feeding', child: Text('Feeding')),
-                DropdownMenuItem(value: 'checkup', child: Text('Checkup')),
-                DropdownMenuItem(value: 'emergency', child: Text('Emergency')),
-                DropdownMenuItem(value: 'alert', child: Text('Alert')),
-                DropdownMenuItem(value: 'other', child: Text('Other')),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Add Event'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Event Title',
+                    hintText: 'e.g., Vaccination - Sheep #456',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  decoration: const InputDecoration(labelText: 'Event Type'),
+                  items: const [
+                    DropdownMenuItem(value: 'medical', child: Text('Medical')),
+                    DropdownMenuItem(value: 'feeding', child: Text('Feeding')),
+                    DropdownMenuItem(value: 'checkup', child: Text('Checkup')),
+                    DropdownMenuItem(value: 'emergency', child: Text('Emergency')),
+                    DropdownMenuItem(value: 'alert', child: Text('Alert')),
+                    DropdownMenuItem(value: 'other', child: Text('Other')),
+                  ],
+                  onChanged: (value) => selectedType = value!,
+                ),
+                const SizedBox(height: 16),
+                // Time picker button
+                InkWell(
+                  onTap: () async {
+                    final TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime ?? TimeOfDay.now(),
+                      builder: (BuildContext context, Widget? child) {
+                        return MediaQuery(
+                          data: MediaQuery.of(context).copyWith(
+                            alwaysUse24HourFormat: true,
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (pickedTime != null) {
+                      setState(() {
+                        selectedTime = pickedTime;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.access_time),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            selectedTime != null
+                                ? '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}'
+                                : 'Time',
+                            style: TextStyle(
+                              color: selectedTime != null 
+                                  ? Theme.of(context).textTheme.bodyLarge?.color
+                                  : Theme.of(context).hintColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        if (selectedTime != null)
+                          IconButton(
+                            icon: const Icon(Icons.clear, size: 20),
+                            onPressed: () {
+                              setState(() {
+                                selectedTime = null;
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (optional)',
+                    hintText: 'Additional details...',
+                  ),
+                  maxLines: 2,
+                ),
               ],
-              onChanged: (value) => selectedType = value!,
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: timeController,
-              decoration: const InputDecoration(
-                labelText: 'Time',
-                hintText: 'e.g., 09:00',
-              ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  final timeString = selectedTime != null
+                      ? '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}'
+                      : 'All day';
+                
+                  _addEvent(
+                    titleController.text,
+                    selectedType,
+                    timeString,
+                    descriptionController.text,
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Add'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (titleController.text.isNotEmpty) {
-                _addEvent(
-                  titleController.text,
-                  selectedType,
-                  timeController.text.isEmpty ? 'All day' : timeController.text,
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
@@ -279,16 +332,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           color: event.getTypeColor(),
                         ),
                         title: Text(event.title),
-                        subtitle: Text('${event.type} • ${event.time}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${event.type} • ${event.time}'),
+                            if (event.description.isNotEmpty)
+                              Text(
+                                event.description,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                          ],
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              final dateKey = _formatDateKey(_selectedDay!);
-                              _eventsData[dateKey]?.removeAt(index);
-                              _selectedEvents.value = _getEventsForDay(_selectedDay!);
-                            });
-                          },
+                          onPressed: () => _deleteEvent(event),
                         ),
                       ),
                     );
@@ -301,72 +358,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
     );
   }
-}
-
-// Updated Event class with JSON support
-class Event {
-  final String title;
-  final String type;
-  final String time;
-
-  const Event({
-    required this.title,
-    required this.type,
-    required this.time,
-  });
-
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return Event(
-      title: json['title'] ?? '',
-      type: json['type'] ?? 'other',
-      time: json['time'] ?? 'All day',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'type': type,
-      'time': time,
-    };
-  }
-
-  Color getTypeColor() {
-    switch (type) {
-      case 'medical':
-        return Colors.blue;
-      case 'emergency':
-        return Colors.red;
-      case 'feeding':
-        return Colors.green;
-      case 'checkup':
-        return Colors.orange;
-      case 'alert':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData getTypeIcon() {
-    switch (type) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'emergency':
-        return Icons.emergency;
-      case 'feeding':
-        return Icons.restaurant;
-      case 'checkup':
-        return Icons.health_and_safety;
-      case 'alert':
-        return Icons.warning;
-      default:
-        return Icons.event;
-    }
-  }
-
-  @override
-  String toString() => title;
 }
 
 final kFirstDay = DateTime(DateTime.now().year - 1, 1, 1);
