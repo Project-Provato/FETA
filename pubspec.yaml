@@ -32,6 +32,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  table_calendar: ^3.0.9
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -53,13 +54,13 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/fabicon_400x400.png"  # Path to your app icon image
-  
-
-  # Add adaptive icon settings:
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
+  image_path: "assets/fabicon_clearbg.png"  # Path to your app icon image
+  adaptive_icon_background: "#FFFFFF"  # Background color for adaptive icons
+  adaptive_icon_foreground: "assets/fabicon_clearbg.png"  # Foreground
+  # image for adaptive icons
+  remove_alpha_ios: true  # Remove alpha channel for iOS icons
+  android_icon_name: "ic_launcher"  # Name for Android icons
+  ios_icon_name: "AppIcon"  # Name for iOS icons
 # The following section is specific to Flutter packages.
 flutter:
   assets:
