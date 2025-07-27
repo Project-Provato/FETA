@@ -59,6 +59,41 @@ flutter build apk --release
 flutter build appbundle --release
 ```
 
+## 🚧 Roadmap
+
+### 🎯 Next Release (v0.2)
+- [ ] **Real-time Monitoring**
+  - [ ] Temperature sensor integration
+  - [ ] Push notification alerts
+  - [ ] Movement tracking basics
+
+- [ ] **Data Management**
+  - [ ] Local database setup (SQLite)
+  - [ ] Export health reports (PDF/CSV)
+  - [ ] Data backup functionality
+
+### Future Features (v1.0+)
+- [ ] **Backend & Sync**
+  - [ ] Cloud database integration
+  - [ ] Multi-device synchronization
+  - [ ] REST API development
+
+- [ ] **Analytics & Insights**
+  - [ ] Historical data charts
+  - [ ] Health trend analysis
+  - [ ] Predictive alerts
+
+- [ ] **Polish & Accessibility**
+  - [ ] Accessibility improvements
+  - [ ] Advanced error handling
+  - [ ] Multilingual support
+
+### ✅ Completed
+- [x] Basic UI framework
+- [x] Calendar integration
+- [x] Responsive design
+- [x] Dark mode support
+
 ## 🤝 Contributing
 
 1. Fork the repository
