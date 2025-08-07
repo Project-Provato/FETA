@@ -7,6 +7,7 @@ class Event {
   final String time;
   final String description;
   final int? animalId;
+  final int? milkProduction; // ml
 
   const Event({
     this.id,
@@ -15,6 +16,7 @@ class Event {
     required this.time,
     this.description = '',
     this.animalId,
+    this.milkProduction,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class Event {
       time: json['time'] ?? 'All day',
       description: json['description'] ?? '',
       animalId: json['animalId'],
+      milkProduction: json['milkProduction'],
     );
   }
 
@@ -36,6 +39,7 @@ class Event {
       'time': time,
       'description': description,
       if (animalId != null) 'animalId': animalId,
+      if (milkProduction != null) 'milkProduction': milkProduction,
     };
   }
 
@@ -46,6 +50,7 @@ class Event {
     String? time,
     String? description,
     int? animalId,
+    int? milkProduction,
   }) {
     return Event(
       id: id ?? this.id,
@@ -54,6 +59,7 @@ class Event {
       time: time ?? this.time,
       description: description ?? this.description,
       animalId: animalId ?? this.animalId,
+      milkProduction: milkProduction ?? this.milkProduction,
     );
   }
 
@@ -69,6 +75,8 @@ class Event {
         return Colors.orange;
       case 'alert':
         return Colors.purple;
+      case 'milking':
+        return Colors.cyan;
       default:
         return Colors.grey;
     }
@@ -86,6 +94,8 @@ class Event {
         return Icons.health_and_safety;
       case 'alert':
         return Icons.warning;
+      case 'milking':
+        return Icons.opacity;
       default:
         return Icons.event;
     }
@@ -103,11 +113,12 @@ class Event {
         other.type == type &&
         other.time == time &&
         other.description == description &&
-        other.animalId == animalId;
+        other.animalId == animalId &&
+        other.milkProduction == milkProduction;
   }
 
   @override
   int get hashCode {
-    return Object.hash(id, title, type, time, description, animalId);
+    return Object.hash(id, title, type, time, description, animalId, milkProduction);
   }
 }
